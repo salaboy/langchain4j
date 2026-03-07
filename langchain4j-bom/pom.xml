@@ -5,7 +5,7 @@
     <parent>
         <groupId>dev.langchain4j</groupId>
         <artifactId>langchain4j-parent</artifactId>
-        <version>1.11.0-beta19</version>
+        <version>1.11.0-beta19-patched</version>
         <relativePath>../langchain4j-parent/pom.xml</relativePath>
     </parent>
 
@@ -18,7 +18,7 @@
 
     <properties>
         <langchain4j.stable.version>1.11.0</langchain4j.stable.version>
-        <langchain4j.beta.version>1.11.0-beta19</langchain4j.beta.version>
+        <langchain4j.beta.version>1.11.0-beta19-patched</langchain4j.beta.version>
     </properties>
 
     <dependencyManagement>
@@ -197,7 +197,7 @@
             <dependency>
                 <groupId>dev.langchain4j</groupId>
                 <artifactId>langchain4j-vertex-ai-anthropic</artifactId>
-                <version>1.11.0-beta19</version>
+                <version>1.11.0-beta19-patched</version>
             </dependency>
 
             <dependency>

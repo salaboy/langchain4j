@@ -6,12 +6,12 @@
     <parent>
         <groupId>dev.langchain4j</groupId>
         <artifactId>langchain4j-parent</artifactId>
-        <version>1.11.0-beta19</version>
+        <version>1.11.0-beta19-patched</version>
         <relativePath>../../langchain4j-parent/pom.xml</relativePath>
     </parent>
 
     <artifactId>langchain4j-http-client-apache</artifactId>
-    <version>1.11.0-beta19</version>
+    <version>1.11.0-beta19-patched</version>
     <name>LangChain4j :: HTTP Client :: Apache HttpClient5</name>
 
     <dependencies>

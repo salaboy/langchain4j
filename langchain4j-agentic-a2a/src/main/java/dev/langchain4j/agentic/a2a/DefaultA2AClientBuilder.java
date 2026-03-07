@@ -136,30 +136,30 @@ public class DefaultA2AClientBuilder<T> implements A2AClientBuilder<T>, Internal
         }
 
         Message message =
-                new Message.Builder().role(Message.Role.USER).parts(parts).build();
+                Message.builder().role(Message.Role.ROLE_USER).parts(parts).build();
 
         final CompletableFuture<String> messageResponse = new CompletableFuture<>();
         List<BiConsumer<ClientEvent, AgentCard>> consumers = List.of((event, card) -> {
             if (event instanceof MessageEvent messageEvent) {
-                messageResponse.complete(messageEvent.getMessage().getParts().stream()
+                messageResponse.complete(messageEvent.getMessage().parts().stream()
                         .filter(TextPart.class::isInstance)
                         .map(TextPart.class::cast)
-                        .map(TextPart::getText)
+                        .map(TextPart::text)
                         .collect(Collectors.joining("\n")));
             } else if (event instanceof TaskEvent taskEvent) {
-                messageResponse.complete(taskEvent.getTask().getArtifacts().stream()
+                messageResponse.complete(taskEvent.getTask().artifacts().stream()
                         .flatMap(a -> a.parts().stream())
                         .filter(TextPart.class::isInstance)
                         .map(TextPart.class::cast)
-                        .map(TextPart::getText)
+                        .map(TextPart::text)
                         .collect(Collectors.joining("\n")));
             } else if (event instanceof TaskUpdateEvent updateEvent) {
-                if (updateEvent.getTask().getArtifacts() != null) {
-                    messageResponse.complete(updateEvent.getTask().getArtifacts().stream()
+                if (updateEvent.getTask().artifacts() != null) {
+                    messageResponse.complete(updateEvent.getTask().artifacts().stream()
                             .flatMap(a -> a.parts().stream())
                             .filter(TextPart.class::isInstance)
                             .map(TextPart.class::cast)
-                            .map(TextPart::getText)
+                            .map(TextPart::text)
                             .collect(Collectors.joining("\n")));
                 }
             } else {
@@ -172,7 +172,7 @@ public class DefaultA2AClientBuilder<T> implements A2AClientBuilder<T>, Internal
             LOG.error("Streaming error occurred: " + error.getMessage(), error);
             messageResponse.completeExceptionally(error);
         };
-        a2aClient.sendMessage(message, consumers, streamingErrorHandler);
+        a2aClient.sendMessage(message, consumers, streamingErrorHandler, null);
         try {
             String responseText = messageResponse.get();
             LOG.debug("Response: " + responseText);

@@ -339,8 +339,13 @@ public class PlannerBasedInvocationHandler implements InvocationHandler, Interna
 
         private void parallelExecution(List<AgentExecutor> agents) {
             Executor exec = executor != null ? executor : DefaultExecutorProvider.getDefaultExecutorService();
+            io.opentelemetry.context.Context otelContext = io.opentelemetry.context.Context.current();
             var tasks = agents.stream()
-                    .map(agentExecutor -> CompletableFuture.supplyAsync(() -> agentExecutor.execute(agenticScope, this), exec))
+                    .map(agentExecutor -> CompletableFuture.supplyAsync(() -> {
+                        try (io.opentelemetry.context.Scope scope = otelContext.makeCurrent()) {
+                            return agentExecutor.execute(agenticScope, this);
+                        }
+                    }, exec))
                     .toList();
             try {
                 for (Future<?> future : tasks) {

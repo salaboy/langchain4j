@@ -29,6 +29,7 @@ import java.lang.reflect.Method;
 import java.lang.reflect.Proxy;
 import java.lang.reflect.Type;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.CompletableFuture;
@@ -36,6 +37,7 @@ import java.util.concurrent.ExecutionException;
 import java.util.function.BiConsumer;
 import java.util.function.Consumer;
 import java.util.stream.Collectors;
+import org.a2aproject.sdk.client.transport.spi.interceptors.ClientCallContext;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -116,6 +118,18 @@ public class DefaultA2AClientBuilder<T> implements A2AClientBuilder<T>, Internal
         return invokeAgent(getReturnType(method), args);
     }
 
+    private static ClientCallContext buildTraceCallContext() {
+        try {
+            Map<String, String> headers = new HashMap<>();
+            io.opentelemetry.api.GlobalOpenTelemetry.getPropagators()
+                    .getTextMapPropagator()
+                    .inject(io.opentelemetry.context.Context.current(), headers, Map::put);
+            return headers.isEmpty() ? null : new ClientCallContext(null, headers);
+        } catch (NoClassDefFoundError ignored) {
+            return null;
+        }
+    }
+
     private static Type getReturnType(Method method) {
         Type type = method.getGenericReturnType();
         return type == Object.class ? String.class : type;
@@ -172,7 +186,8 @@ public class DefaultA2AClientBuilder<T> implements A2AClientBuilder<T>, Internal
             LOG.error("Streaming error occurred: " + error.getMessage(), error);
             messageResponse.completeExceptionally(error);
         };
-        a2aClient.sendMessage(message, consumers, streamingErrorHandler, null);
+        ClientCallContext callContext = buildTraceCallContext();
+        a2aClient.sendMessage(message, consumers, streamingErrorHandler, callContext);
         try {
             String responseText = messageResponse.get();
             LOG.debug("Response: " + responseText);
